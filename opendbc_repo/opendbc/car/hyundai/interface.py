@@ -81,6 +81,10 @@ class CarInterface(CarInterfaceBase):
       if ret.flags & HyundaiFlags.CANFD_CAMERA_SCC:
         ret.safetyConfigs[-1].safetyParam |= HyundaiSafetyFlags.CAMERA_SCC.value
 
+      # CAN FD 0x180 - 0x184 have radar track information
+      if 0x180 in fingerprint[CAN.ACAN]:
+        ret.flags |= HyundaiFlags.CANFD_RADAR.value
+
     else:
       # Shared configuration for non CAN-FD cars
       ret.alphaLongitudinalAvailable = candidate not in UNSUPPORTED_LONGITUDINAL_CAR
@@ -125,7 +129,8 @@ class CarInterface(CarInterfaceBase):
 
     # Common longitudinal control setup
 
-    ret.radarUnavailable = RADAR_START_ADDR not in fingerprint[1] or Bus.radar not in DBC[ret.carFingerprint]
+    #ret.radarUnavailable = RADAR_START_ADDR not in fingerprint[1] or Bus.radar not in DBC[ret.carFingerprint]
+    ret.radarUnavailable = (RADAR_START_ADDR not in fingerprint[1] or Bus.radar not in DBC[ret.carFingerprint]) and 0x180 not in fingerprint[CAN.ACAN]
     ret.openpilotLongitudinalControl = alpha_long and ret.alphaLongitudinalAvailable
     ret.pcmCruise = not ret.openpilotLongitudinalControl
     ret.startingState = True
