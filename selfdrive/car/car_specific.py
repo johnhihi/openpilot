@@ -123,6 +123,12 @@ class CarSpecificEvents:
     elif self.CP.brand == 'hyundai':
       events = self.create_common_events(CS, CS_prev, extra_gears=(GearShifter.sport, GearShifter.manumatic),
                                          pcm_enable=self.CP.pcmCruise, allow_button_cancel=False)
+      for be in CS.buttonEvents:
+        if be.type == ButtonType.lkas and be.pressed:
+          if CC.latActive:
+            events.add(EventName.buttonCancel)
+          else:
+            events.add(EventName.buttonEnable)
 
     else:
       events = self.create_common_events(CS, CS_prev)
